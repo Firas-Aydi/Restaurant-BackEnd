@@ -5,6 +5,8 @@ import pickle
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
+# Importez la classe Query pour effectuer des requêtes sur la base de données Firestore
+from google.cloud.firestore import Query
 
 app = Flask(__name__)
 CORS(app)
@@ -52,7 +54,7 @@ def get_menu():
     data = request.json
     # print("data : ", data)
     restaurantName = data.get("restaurantName")  # Récupérer l'UID du restaurant depuis les données envoyées par le frontend
-    print("restaurantName : ", restaurantName)
+    # print("restaurantName : ", restaurantName)
 
     if not restaurantName:
         print("restaurantName du restaurant non fourni")
@@ -71,10 +73,11 @@ def get_menu():
     user = users[0].to_dict()
     # print("user : ", user)
     restaurant_uid = user.get("uid")
-    print("restaurant_uid : ", restaurant_uid)
+    # print("restaurant_uid : ", restaurant_uid)
 
     # Récupérer le premier menu correspondant à l'UID du restaurant avec limit(1)
-    menus_ref = db.collection("menus").where("uid", "==", restaurant_uid).limit(1)
+    # menus_ref = db.collection("menus").where("uid", "==", restaurant_uid).limit(1)
+    menus_ref = db.collection("menus").where("uid", "==", restaurant_uid).order_by("jour", direction=Query.DESCENDING).limit(1)
     menus = menus_ref.get()
     # print("menus : ", menus)
     
@@ -83,15 +86,14 @@ def get_menu():
     restaurant_menus = []
     for menu in menus:
         menu_data = menu.to_dict()
-        print("menu_data : ", menu_data)
+        # print("menu_data le plus récent: ", menu_data)
         restaurant_menus.append(menu_data)
 
     if not restaurant_menus:
         return jsonify({"error": "Aucun menu trouvé pour cet UID de restaurant"}), 404
-
-    # menu = "ici le menu de " + (data.restaurant["restaurantName"])
-    print("restaurant_menus : ", restaurant_menus)   
+    # print("restaurant_menus : ", restaurant_menus)   
     return jsonify({"restaurant_menus": restaurant_menus})
+pass
 
 
 @app.route("/predict_sentiment", methods=["POST"])

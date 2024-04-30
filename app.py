@@ -99,6 +99,7 @@ pass
 @app.route("/predict_sentiment", methods=["POST"])
 def predict_sentiment():
     data = request.json
+    # print("data: ", data)
     text = data["text"]
     text_vectorized = tfidf.transform([text])
     sentiment = rest_model.predict(text_vectorized)[0]

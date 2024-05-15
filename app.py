@@ -7,6 +7,7 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 # Importez la classe Query pour effectuer des requêtes sur la base de données Firestore
 from google.cloud.firestore import Query
+from googletrans import Translator
 
 app = Flask(__name__)
 CORS(app)
@@ -95,13 +96,19 @@ def get_menu():
     return jsonify({"restaurant_menus": restaurant_menus})
 pass
 
+translator = Translator()
 
 @app.route("/predict_sentiment", methods=["POST"])
 def predict_sentiment():
     data = request.json
     # print("data: ", data)
     text = data["text"]
-    text_vectorized = tfidf.transform([text])
+    # Translate the text to English
+    translated_text = translator.translate(text, dest='en').text
+    
+    # Vectorize the translated text
+    text_vectorized = tfidf.transform([translated_text])
+    # text_vectorized = tfidf.transform([text])
     sentiment = rest_model.predict(text_vectorized)[0]
     return jsonify({"sentiment": sentiment})
 
